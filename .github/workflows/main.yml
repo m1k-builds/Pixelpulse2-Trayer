@@ -13,7 +13,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ windows-latest] #[ubuntu-latest, macos-latest, windows-latest]
+        os: [ windows-latest ] #[ubuntu-latest, macos-latest, windows-latest]
 
     steps:
     - name: Checkout repository
@@ -23,8 +23,8 @@ jobs:
       uses: jurplel/install-qt-action@v2
       with:
         version: '5.15.2'
-        host: ${{ matrix.os }}
-        target: ${{ matrix.os }}
+        host: windows
+        target: windows
         arch: 'desktop'
 
     - name: Install dependencies (Linux)
