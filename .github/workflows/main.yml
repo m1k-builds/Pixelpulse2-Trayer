@@ -1,0 +1,76 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - qt-version-update
+  #pull_request:
+  #  branches:
+  #    - main
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest] #[ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Qt
+      uses: jurplel/install-qt-action@v2
+      with:
+        version: '5.15.2'
+        host: ${{ matrix.os }}
+        target: ${{ matrix.os }}
+        arch: 'desktop'
+
+    - name: Install dependencies (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libusb-1.0-0-dev
+
+    - name: Install dependencies (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew update
+        brew install libusb qt
+
+    - name: Install dependencies (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        choco install -y mingw libusb
+
+    - name: Build project
+      run: |
+        qmake pp2trayer.pro
+        make
+
+    - name: Package executables (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        mkdir -p deploy
+        cp pp2trayer deploy/
+
+    - name: Package executables (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        /usr/local/opt/qt/bin/macdeployqt pp2trayer.app -dmg
+        mkdir -p deploy
+        cp pp2trayer.dmg deploy/
+
+    - name: Package executables (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        windeployqt release\pp2trayer.exe
+        mkdir -p deploy
+        cp release\pp2trayer.exe deploy/
+
+    - name: Upload release assets
+      uses: actions/upload-artifact@v2
+      with:
+        name: pp2trayer
+        path: deploy/
