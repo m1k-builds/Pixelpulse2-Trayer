@@ -70,7 +70,7 @@ jobs:
         cp release\pp2trayer.exe deploy/
 
     - name: Upload release assets
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: pp2trayer
         path: deploy/
